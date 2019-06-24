@@ -22,6 +22,7 @@ class CreateQuestionsTable extends Migration
             $table->string('image')->nullable();
             $table->string('keyboard_answer')->nullable();
             $table->string('correct_answer')->nullable();
+            $table->boolean('is_free')->nullable()->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

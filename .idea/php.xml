@@ -99,6 +99,9 @@
       <path value="$PROJECT_DIR$/vendor/guzzlehttp/promises" />
       <path value="$PROJECT_DIR$/vendor/laravelcollective/html" />
       <path value="$PROJECT_DIR$/vendor/kris/laravel-form-builder" />
+      <path value="$PROJECT_DIR$/vendor/zofe/rapyd" />
+      <path value="$PROJECT_DIR$/vendor/zofe/burp" />
+      <path value="$PROJECT_DIR$/vendor/intervention/image" />
     </include_path>
   </component>
   <component name="PhpUnit">

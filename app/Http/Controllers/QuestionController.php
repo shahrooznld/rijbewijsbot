@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Kris\LaravelFormBuilder\FormBuilder;
 use App\Traits\UploadTrait;
+use Zofe\Rapyd\DataGrid\DataGrid;
 
 class QuestionController extends Controller
 {
@@ -20,7 +21,12 @@ class QuestionController extends Controller
      */
     public function index()
     {
-        return view('question.index');
+        $grid = DataGrid::source(new Question());
+        $grid->add('question_nl', 'Nl', true); //field name, label, sortable
+        $grid->add('question_fa', 'Fa', true); //field name, label, sortable
+        $grid->paginate(10); //pagination
+
+        return view('question.index', compact('grid'));
     }
 
     /**
@@ -59,7 +65,8 @@ class QuestionController extends Controller
             $values['image'] = $filePath;
         }
         Question::create($values);
-        return redirect()->route('bots.index')->with(['status' => 'Question added successfully.']);
+
+        return redirect()->route('questions.index')->with(['status' => 'Question added successfully.']);
     }
 
     /**
@@ -81,12 +88,13 @@ class QuestionController extends Controller
      */
     public function edit(Question $Question, FormBuilder $formBuilder)
     {
-        $form = $formBuilder->create(QuestionForm::class,[
+        $form = $formBuilder->create(QuestionForm::class, [
             'method' => 'PUT',
             'url' => route('questions.store'),
             'model' => $Question,
         ]);
-        return view('question.edit',compact('form'));
+
+        return view('question.edit', compact('form'));
     }
 
     /**
@@ -96,9 +104,23 @@ class QuestionController extends Controller
      * @param \App\Question $Question
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Question $Question)
+    public function update(Request $request, FormBuilder $formBuilder, Question $Question)
     {
-        //
+        $form = $formBuilder->create(QuestionForm::class);
+        $values = $form->getFieldValues();
+
+        if ($request->has('image')) {
+            $image = $request->file('image');
+            $name = 'question_'.time();
+            $folder = '/uploads/images/';
+            $filePath = $folder.$name.'.'.$image->getClientOriginalExtension();
+            $this->uploadOne($image, $folder, 'public', $name);
+            $values['image'] = $filePath;
+        }
+        $Question->fill($values);
+        $Question->save();
+
+        return redirect()->route('bots.index')->with(['status' => 'Question updated successfully.']);
     }
 
     /**
