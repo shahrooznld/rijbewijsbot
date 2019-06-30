@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Bot;
 use Illuminate\Http\Request;
 use Telegram\Bot\Api;
+use Telegram\Bot\Laravel\Facades\Telegram;
 
 class BotController extends Controller
 {
@@ -38,7 +39,10 @@ class BotController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        $answer = new Answer();
+        $answer->SaveTextAndAnswer();
+
     }
 
     /**

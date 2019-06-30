@@ -15,13 +15,19 @@ class CreateQuestionsTable extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('question_nl')->nullable();
-            $table->string('question_fa')->nullable();
+            $table->string('script_name')->nullable();
+            $table->text('question_nl')->nullable();
+            $table->text('question_fa')->nullable();
             $table->string('audio_nl')->nullable();
             $table->string('audio_fa')->nullable();
-            $table->string('image')->nullable();
-            $table->string('keyboard_answer')->nullable();
+            $table->string('image')->default('uploads/images/default.jpg')->nullable();
+            $table->string('answer_1')->nullable();
+            $table->string('answer_2')->nullable();
+            $table->string('answer_3')->nullable();
+            $table->string('answer_4')->nullable();
             $table->string('correct_answer')->nullable();
+            $table->text('description_nl')->nullable();
+            $table->text('description_fa')->nullable();
             $table->boolean('is_free')->nullable()->default(false);
             $table->timestamps();
             $table->softDeletes();

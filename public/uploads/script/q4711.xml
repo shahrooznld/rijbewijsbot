@@ -1,0 +1,194 @@
+<?xml version="1.0"?>
+<Script>
+<Element name="colors">
+	<Property name="settings">#041142</Property>
+	<Property name="version">#003366</Property>
+	<Property name="text">#BEC9D9</Property>
+	<Property name="hltext">#FFFFFF</Property>
+	<Property name="answer">#003366</Property>
+	<Property name="hlanswer">#FFFFFF</Property>
+	<Property name="motivate">#041142</Property>
+	<Property name="message">#003366</Property>
+</Element>
+<Element name="questions">
+	<Property name="value">40</Property>
+</Element>
+<Element name="dangerquestions">
+	<Property name="value">25</Property>
+</Element>
+<Element name="menu">
+	<Property name="file">VM0321.swf</Property>
+</Element>
+<Element name="fonts">
+	<Property name="settings">16px bold Verdana</Property>
+	<Property name="text">15px Verdana</Property>
+	<Property name="answer">20px bold anti-aliased Verdana</Property>
+	<Property name="hsign">26px bold Verdana</Property>
+	<Property name="vsign">26px bold Verdana</Property>
+	<Property name="num">10px Verdana</Property>
+</Element>
+<Element name="tracker">
+	<Property name="value">question</Property>
+</Element>
+<Element name="stop">
+	<Property name="state">on</Property>
+</Element>
+<Element name="pause">
+	<Property name="action">pauseshow(show)</Property>
+</Element>
+<Element name="fwd">
+	<Property name="repeat">250</Property>
+</Element>
+<Element name="rev">
+	<Property name="repeat">250</Property>
+</Element>
+<Element name="play">
+	<Property name="state">hidden</Property>
+</Element>
+<Element name="motivate">
+	<Property name="state">hidden</Property>
+</Element>
+<Element name="show">
+	<Property name="type">show</Property>
+	<Property name="file">*100</Property>
+	<Property name="state">off</Property>
+</Element>
+<Element name="numb.txt">
+	<Property name="type">text</Property>
+	<Property name="align">topright</Property>
+	<Property name="font">10px Verdana</Property>
+	<Property name="color">#000000</Property>
+	<Property name="state">dis</Property>
+	<Property name="text">4711</Property>
+</Element>
+<Element name="question.txt">
+	<Property name="type">text</Property>
+	<Property name="align">topleft</Property>
+	<Property name="font">15px Verdana</Property>
+	<Property name="color">#BEC9D9</Property>
+	<Property name="state">off</Property>
+	<Property name="text">Deze verkeersborden staan onder elkaar. Wat betekenen ze samen?</Property>
+</Element>
+<Element name="answer.txt">
+	<Property name="type">text</Property>
+	<Property name="align">left</Property>
+	<Property name="font">20px bold anti-aliased Verdana</Property>
+	<Property name="color">#BEC9D9</Property>
+	<Property name="state">hidden</Property>
+	<Property name="p0color">#FFFFFF</Property>
+</Element>
+<Element name="answeris">
+	<Property name="file">antwis.mp3</Property>
+</Element>
+<Element name="yes">
+	<Property name="file">ja.mp3</Property>
+</Element>
+<Element name="no">
+	<Property name="file">nee.mp3</Property>
+</Element>
+<Element name="a">
+	<Property name="file">a.mp3</Property>
+</Element>
+<Element name="b">
+	<Property name="file">b.mp3</Property>
+</Element>
+<Element name="c">
+	<Property name="file">c.mp3</Property>
+</Element>
+<Element name="unit.txt">
+	<Property name="type">text</Property>
+	<Property name="align">center</Property>
+	<Property name="font">19px Fixedsys</Property>
+	<Property name="color">#000000</Property>
+	<Property name="text">                
+                </Property>
+</Element>
+<Element name="signs">
+	<Property name="hskip">15</Property>
+	<Property name="subvskip">5</Property>
+</Element>
+<Element name="keys">
+	<Property name="state">hidden</Property>
+</Element>
+<Element name="popupmotivate">
+	<Property name="prio">100</Property>
+</Element>
+<Element name="closemotivate">
+	<Property name="prio">100</Property>
+</Element>
+<Element name="motivate.txt">
+	<Property name="type">text</Property>
+	<Property name="align">topleft</Property>
+	<Property name="font">15px Verdana</Property>
+	<Property name="color">#041142</Property>
+	<Property name="state">hidden</Property>
+	<Property name="prio">100</Property>
+	<Property name="text">Motorvoertuigen mogen elkaar niet inhalen. Rijdt er voor je een tractor of een ander voertuig dat niet harder mag dan 25 kilometer per uur? Dan mag je wel inhalen.</Property>
+</Element>
+<Element name="examtitle.txt">
+	<Property name="type">text</Property>
+	<Property name="align">right</Property>
+	<Property name="font">15px Verdana</Property>
+	<Property name="color">#24407F</Property>
+</Element>
+<Element name="foto.r">
+	<Property name="type">draw</Property>
+	<Property name="shape">image</Property>
+	<Property name="state">off</Property>
+	<Property name="align">center</Property>
+	<Property name="scaledown">aspect</Property>
+	<Property name="file">vkf13566.jpg</Property>
+</Element>
+<Element name="answera.txt">
+	<Property name="type">text</Property>
+	<Property name="align">left</Property>
+	<Property name="font">15px Verdana</Property>
+	<Property name="color">#003366</Property>
+	<Property name="state">hidden</Property>
+	<Property name="colorlink">answera</Property>
+	<Property name="p0color">#FFFFFF</Property>
+	<Property name="text">Motoren mogen alleen tractoren inhalen.</Property>
+</Element>
+<Element name="answerb.txt">
+	<Property name="type">text</Property>
+	<Property name="align">left</Property>
+	<Property name="font">15px Verdana</Property>
+	<Property name="color">#003366</Property>
+	<Property name="state">hidden</Property>
+	<Property name="colorlink">answerb</Property>
+	<Property name="p0color">#FFFFFF</Property>
+	<Property name="text">Motorvoertuigen mogen alleen tractoren inhalen.</Property>
+</Element>
+<Element name="answerc.txt">
+	<Property name="type">text</Property>
+	<Property name="align">left</Property>
+	<Property name="font">15px Verdana</Property>
+	<Property name="color">#003366</Property>
+	<Property name="state">hidden</Property>
+	<Property name="colorlink">answerc</Property>
+	<Property name="p0color">#FFFFFF</Property>
+	<Property name="text">Motorvoertuigen mogen andere motorvoertuigen niet inhalen, maar wel motorvoertuigen die niet harder mogen rijden dan 25 kilometer per uur. Bijvoorbeeld tractoren.</Property>
+</Element>
+<Element name="question">
+	<Property name="file">vkn4711.mp3</Property>
+</Element>
+<Element name="answera">
+	<Property name="file">vkn4711a.mp3</Property>
+</Element>
+<Element name="answerb">
+	<Property name="file">vkn4711b.mp3</Property>
+</Element>
+<Element name="answerc">
+	<Property name="file">vkn4711c.mp3</Property>
+	<Property name="correct"/>
+</Element>
+<Element name="subjects">
+	<Property name="count">1</Property>
+	<Property name="title1">Verkeersbordenregister en aanwijzigingen</Property>
+</Element>
+<Element name="classes">
+	<Property name="count">1</Property>
+	<Property name="code1">X</Property>
+	<Property name="title1">Verkeersborden</Property>
+</Element>
+</Script>

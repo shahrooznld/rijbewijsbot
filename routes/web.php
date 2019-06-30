@@ -15,6 +15,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::get('bot','BotController@index');
+Route::post('bot','BotController@store');
 Route::resource('questions', 'QuestionController');
 Auth::routes();
 

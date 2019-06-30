@@ -17,6 +17,7 @@ class CreateUserQuestionTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('question_id');
+            $table->string('answer')->nullable();
             $table->timestamps();
         });
     }

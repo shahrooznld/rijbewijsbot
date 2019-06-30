@@ -14,6 +14,12 @@ class QuestionController extends Controller
 {
     use UploadTrait;
 
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -21,12 +27,85 @@ class QuestionController extends Controller
      */
     public function index()
     {
-        $grid = DataGrid::source(new Question());
-        $grid->add('question_nl', 'Nl', true); //field name, label, sortable
-        $grid->add('question_fa', 'Fa', true); //field name, label, sortable
-        $grid->paginate(10); //pagination
+//        $dir = 'uploads/script/';
+//        $photoDir = 'uploads/images/';
+//        $audioDir = 'uploads/audios/';
+//        $files = scandir($dir);
+//        foreach ($files as $file) {
+//            $question_nl = null;
+//            $photo = null;
+//            $answerA = null;
+//            $answerB = null;
+//            $answerC = null;
+//            $answerD = null;
+//            $correctAnswer = null;
+//            if ($file != '.' && $file != '..') {
+//                $xmls = simplexml_load_file($dir.$file);
+//                $fileData = json_decode(json_encode($xmls), true);
+//                foreach ($fileData['Element'] as $element) {
+//                    if ($element['@attributes']['name'] == 'question.txt') {
+//                        $question_nl = $element['Property'][5];
+//                    } elseif ($element['@attributes']['name'] == 'answera.txt') {
+//                        $answerA = $element['Property'][7];
+//
+//                    } elseif ($element['@attributes']['name'] == 'answerb.txt') {
+//                        $answerB = $element['Property'][7];
+//
+//                    } elseif ($element['@attributes']['name'] == 'answerc.txt') {
+//                        $answerC = $element['Property'][7];
+//
+//                    } elseif ($element['@attributes']['name'] == 'answera') {
+//                        if (isset($element['Property'][1]['@attributes']['name']) && $element['Property'][1]['@attributes']['name'] == 'correct') {
+//                            $correctAnswer = '1';
+//                        }
+//                    } elseif ($element['@attributes']['name'] == 'answerb') {
+//                        if (isset($element['Property'][1]['@attributes']['name']) && $element['Property'][1]['@attributes']['name'] == 'correct') {
+//                            $correctAnswer = '2';
+//                        }
+//                    } elseif ($element['@attributes']['name'] == 'answerc') {
+//                        if (isset($element['Property'][1]['@attributes']['name']) && $element['Property'][1]['@attributes']['name'] == 'correct') {
+//                            $correctAnswer = '3';
+//                        }
+//                    } elseif ($element['@attributes']['name'] == 'yes') {
+//                        if (isset($element['Property'][1]['@attributes']['name']) && $element['Property'][1]['@attributes']['name'] == 'correct') {
+//                            $correctAnswer = 'Yes';
+//                        }
+//                    } elseif ($element['@attributes']['name'] == 'no') {
+//                        if (isset($element['Property'][1]['@attributes']['name']) && $element['Property'][1]['@attributes']['name'] == 'correct') {
+//                            $correctAnswer = 'No';
+//                        }
+//                    } elseif ($element['@attributes']['name'] == 'answer') {
+//                        if (isset($element['Property'][1])) {
+//                            $correctAnswer = $element['Property'][1];
+//                        }
+//                    } elseif ($element['@attributes']['name'] == 'foto.r') {
+//                        $photo = $photoDir.$element['Property'][5];
+//                    }elseif ($element['@attributes']['name'] == 'motivate.txt') {
+//                        $description = $element['Property'][6];
+//                    }elseif ($element['@attributes']['name'] == 'question') {
+//                        $audio_nl = $audioDir.$element['Property'];
+//                    }
+//
+//                }
+//                Question::create([
+//                    'script_name' => $file,
+//                    'question_nl' => $question_nl,
+//                    'image' => $photo,
+//                    'audio_nl' => $audio_nl,
+//                    'answer_1' => $answerA,
+//                    'answer_2' => $answerB,
+//                    'answer_3' => $answerC,
+//                    'answer_4' => $answerD,
+//                    'correct_answer' => $correctAnswer,
+//                    'description_nl' => $description,
+//                    'is_free' => 0,
+//                ]);
+//            }
+//        }
 
-        return view('question.index', compact('grid'));
+        $questions = Question::all();
+
+        return view('question.index', compact('questions'));
     }
 
     /**
@@ -56,14 +135,6 @@ class QuestionController extends Controller
         $form = $formBuilder->create(QuestionForm::class);
         $values = $form->getFieldValues();
 
-        if ($request->has('image')) {
-            $image = $request->file('image');
-            $name = 'question_'.time();
-            $folder = '/uploads/images/';
-            $filePath = $folder.$name.'.'.$image->getClientOriginalExtension();
-            $this->uploadOne($image, $folder, 'public', $name);
-            $values['image'] = $filePath;
-        }
         Question::create($values);
 
         return redirect()->route('questions.index')->with(['status' => 'Question added successfully.']);
@@ -90,7 +161,7 @@ class QuestionController extends Controller
     {
         $form = $formBuilder->create(QuestionForm::class, [
             'method' => 'PUT',
-            'url' => route('questions.store'),
+            'url' => route('questions.update',$Question),
             'model' => $Question,
         ]);
 
@@ -109,18 +180,10 @@ class QuestionController extends Controller
         $form = $formBuilder->create(QuestionForm::class);
         $values = $form->getFieldValues();
 
-        if ($request->has('image')) {
-            $image = $request->file('image');
-            $name = 'question_'.time();
-            $folder = '/uploads/images/';
-            $filePath = $folder.$name.'.'.$image->getClientOriginalExtension();
-            $this->uploadOne($image, $folder, 'public', $name);
-            $values['image'] = $filePath;
-        }
         $Question->fill($values);
         $Question->save();
 
-        return redirect()->route('bots.index')->with(['status' => 'Question updated successfully.']);
+        return redirect()->route('questions.index')->with(['status' => 'Question updated successfully.']);
     }
 
     /**

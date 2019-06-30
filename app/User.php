@@ -36,7 +36,7 @@ class User extends Authenticatable
     ];
 
     public function questions() {
-        return $this->belongsToMany(Question::class)->withTimestamps();
+        return $this->belongsToMany(Question::class)->withTimestamps()->withPivot('answer')->latest();
     }
 
     public function bots()
