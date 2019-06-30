@@ -66,6 +66,30 @@ class Answer
             $this->startTest();
         } elseif ($this->text == 'تست بعدی') {
             $this->nextTest();
+        } elseif ($this->text == 'تماس با ما') {
+            $this->telegram->sendMessage([
+                'chat_id' => $this->chat_id,
+                'text' => 'برای تماس با بخش مدیریت به نام کاربری @shahrooz_nld پیغام دهید',
+                'reply_markup' => $this->generateKeyboard('mainMenu'),
+            ]);
+        } elseif ($this->text == 'منوی اصلی') {
+            $this->telegram->sendMessage([
+                'chat_id' => $this->chat_id,
+                'text' => 'شما به بخش منوی اصلی انتقال پیدا کردید لطفا یکی از گزینه های زیر را انتخاب کنید',
+                'reply_markup' => $this->generateKeyboard('mainMenu'),
+            ]);
+        } elseif ($this->text == 'توضیحات در مورد ربات آموزشی رانندگی') {
+            $this->telegram->sendMessage([
+                'chat_id' => $this->chat_id,
+                'text' => 'این ربات تلگرام با داشتن بیش از 1000 نمونه سوالات آزمون راهنمایی رانندگی برای فارسی زبان ها تهیه شده است. برای شروع می توانید در قسمت منوی کیبورد گزینه شروع تست را انتخاب کنید. سوالات به دو زبان فارسی و هلندی به همراه عکس و صدا فرستاده میشود.بعد از خواندن سوال میتوانی به آن پاسخ دهدید.که بعد پاسخ شما ربات به شما اطلاع میدهد که جواب شما صحیح می باشد با خیر',
+                'reply_markup' => $this->generateKeyboard('mainMenu'),
+            ]);
+        } elseif ($this->text == 'خرید اشتراک') {
+            $this->telegram->sendMessage([
+                'chat_id' => $this->chat_id,
+                'text' => 'با خرید اشتراک شما به تمامی سوالات به صورت نامحدود دسترسی خواهید داشت و میتوانید این سوالات را به صورت مداوم تمرین کنید',
+                'reply_markup' => $this->generateKeyboard('mainMenu'),
+            ]);
         } else {
             $this->checkAnswer();
         }
@@ -77,6 +101,7 @@ class Answer
         if ($type == 'start') {
             $keyboard = [
                 ['شروع تست آنلاین', 'تماس با ما'],
+                ['توضیحات در مورد ربات آموزشی رانندگی'],
             ];
 
             $reply_markup = $this->telegram->replyKeyboardMarkup([
@@ -100,9 +125,25 @@ class Answer
 
             return $reply_markup;
 
+        } elseif ($type == 'mainMenu') {
+            $keyboard = [
+                ['شروع تست آنلاین', 'تماس با ما'],
+                ['توضیحات در مورد ربات آموزشی رانندگی'],
+            ];
+
+
+            $reply_markup = $this->telegram->replyKeyboardMarkup([
+                'keyboard' => $keyboard,
+                'resize_keyboard' => true,
+                'one_time_keyboard' => true,
+            ]);
+
+            return $reply_markup;
+
         } elseif ($type == 'nextTest') {
             $keyboard = [
                 ['تست بعدی'],
+                ['منوی اصلی'],
             ];
 
 
@@ -116,8 +157,8 @@ class Answer
 
         } elseif ($type == 'notMoreQuestion') {
             $keyboard = [
-
-                ['بازگشت'],
+                ['منوی اصلی'],
+                ['خرید اشتراک'],
             ];
 
             $reply_markup = $this->telegram->replyKeyboardMarkup([
@@ -130,8 +171,7 @@ class Answer
 
         } elseif ($type = 'unknowenRequest') {
             $keyboard = [
-
-                ['بازگشت'],
+                ['منوی اصلی'],
             ];
 
             $reply_markup = $this->telegram->replyKeyboardMarkup([
