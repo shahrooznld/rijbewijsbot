@@ -42,6 +42,14 @@ class Answer
         $this->firstName = $this->message->getChat()->getFirstName();
         $this->lastName = $this->message->getChat()->getLastName();
         $this->text = $this->message->getText();
+
+//        $this->telegram->sendMessage([
+//                'chat_id' => 343463043,
+//                'text' => $this->text,
+//
+//            ]);
+//        dd('yes');
+//
         $user = User::firstOrCreate(['telegram_user_id' => $this->chat_id], [
             'first_name' => $this->firstName,
             'last_name' => $this->lastName,
@@ -55,7 +63,17 @@ class Answer
             'text' => $this->text,
         ]);
         //var_dump($this->text);
-        $this->Answer();
+        try {
+            $this->Answer();
+        } catch (Exception $e) {
+            $this->telegram->sendMessage([
+                'chat_id' => $this->chat_id,
+                'text' => 'مشکلی پیش آمده دوباره سعی  کنید',
+                'reply_markup' => $this->generateKeyboard('unknowenRequest'),
+
+            ]);
+        }
+
     }
 
     public function Answer()
@@ -63,8 +81,12 @@ class Answer
         if ($this->text == '/start') {
             $this->startBot();
         } elseif ($this->text == 'شروع تست آنلاین') {
+
             $this->startTest();
+
         } elseif ($this->text == 'تست بعدی') {
+            $this->nextTest();
+        } elseif ($this->text == 'ادامه پاسخگویی به سوالات') {
             $this->nextTest();
         } elseif ($this->text == 'تماس با ما') {
             $this->telegram->sendMessage([
@@ -87,9 +109,16 @@ class Answer
         } elseif ($this->text == 'خرید اشتراک') {
             $this->telegram->sendMessage([
                 'chat_id' => $this->chat_id,
-                'text' => 'با خرید اشتراک شما به تمامی سوالات به صورت نامحدود دسترسی خواهید داشت و میتوانید این سوالات را به صورت مداوم تمرین کنید',
+                'text' => 'با خرید اشتراک شما به تمامی سوالات به صورت نامحدود دسترسی خواهید داشت و میتوانید این سوالات را به صورت مداوم تمرین کنید.برای خرید به آی دی تلگرام @shahrooz_nl پیغام دهید',
                 'reply_markup' => $this->generateKeyboard('mainMenu'),
             ]);
+        } elseif ($this->text == 'تعیین نوبت امتحانCBR') {
+            $this->telegram->sendMessage([
+                'chat_id' => $this->chat_id,
+                'text' => 'سلام برای تعیین وقت آنلاین در سایت CBR و یا مشاوره به آی دی تلگرام @shahrooz_nl پیغام دهید',
+                'reply_markup' => $this->generateKeyboard('mainMenu'),
+            ]);
+
         } else {
             $this->checkAnswer();
         }
@@ -128,7 +157,9 @@ class Answer
         } elseif ($type == 'mainMenu') {
             $keyboard = [
                 ['شروع تست آنلاین', 'تماس با ما'],
+                ['ادامه پاسخگویی به سوالات', 'تعیین نوبت امتحانCBR'],
                 ['توضیحات در مورد ربات آموزشی رانندگی'],
+//                ['خرید اشتراک'],
             ];
 
 
@@ -198,9 +229,12 @@ class Answer
 
     public function startTest()
     {
+        $user = User::where('telegram_user_id', $this->chat_id)->first();
+        $user->questions()->detach();
         $question = Question::with('users')->whereDoesntHave('users', function (Builder $query) {
             $query->where('telegram_user_id', $this->chat_id);
-        })->free()->first();
+        })->first();
+        //})->free()->first();
         if (! is_null($question)) {
             $question->image = $question->image ?? 'uploads/images/default.jpg';
             $this->telegram->sendPhoto([
@@ -227,30 +261,49 @@ class Answer
 
     public function nextTest()
     {
-        $question = Question::with('users')->whereDoesntHave('users', function (Builder $query) {
-            $query->where('telegram_user_id', $this->chat_id);
-        })->free()->first();
-        if (! is_null($question)) {
-            $question->image = $question->image ?? 'uploads/images/default.jpg';
-            $this->telegram->sendPhoto([
-                'chat_id' => $this->chat_id,
-                'photo' => $question->image,
-                'caption' => $question->question_nl.PHP_EOL.PHP_EOL.$question->question_fa.PHP_EOL.$question->TextAnswer,
-                'reply_markup' => $this->generateKeyboard('answerKeyboard', $question),
-            ]);
-            $this->telegram->sendVoice([
-                'chat_id' => $this->chat_id,
-                'voice' => $question->audio_nl,
-            ]);
+        $user = User::with([
+            'questions' => function ($query) {
+                $query->orderBy('pivot_created_at', 'DESC');
+            },
+        ])->where('telegram_user_id', $this->chat_id)->first();
 
-            $user = User::with('questions')->where('telegram_user_id', $this->chat_id)->first();
-            $user->questions()->attach([$question->id]);
-        } else {
+        $currentQuestion = $user->questions->first();
+        if (! is_null($currentQuestion) && is_null($currentQuestion->pivot->answer)) {
+
             $this->telegram->sendMessage([
                 'chat_id' => $this->chat_id,
-                'text' => 'سولات شما به پایان رسیده است',
-                'reply_markup' => $this->generateKeyboard('notMoreQuestion'),
+                'text' => 'شما به سوال قبل خود پاسخ نداده اید لطفا پاسخ سوال قبل خود را بدهید',
+                'reply_markup' => $this->generateKeyboard('answerKeyboard', $currentQuestion),
             ]);
+        } else {
+
+
+            $question = Question::with('users')->whereDoesntHave('users', function (Builder $query) {
+                $query->where('telegram_user_id', $this->chat_id);
+            })->first();
+            //})->free()->first();
+            if (! is_null($question)) {
+                $question->image = $question->image ?? 'uploads/images/default.jpg';
+                $this->telegram->sendPhoto([
+                    'chat_id' => $this->chat_id,
+                    'photo' => $question->image,
+                    'caption' => $question->question_nl.PHP_EOL.PHP_EOL.$question->question_fa.PHP_EOL.$question->TextAnswer,
+                    'reply_markup' => $this->generateKeyboard('answerKeyboard', $question),
+                ]);
+                $this->telegram->sendVoice([
+                    'chat_id' => $this->chat_id,
+                    'voice' => $question->audio_nl,
+                ]);
+
+                $user = User::with('questions')->where('telegram_user_id', $this->chat_id)->first();
+                $user->questions()->attach([$question->id]);
+            } else {
+                $this->telegram->sendMessage([
+                    'chat_id' => $this->chat_id,
+                    'text' => 'سولات شما به پایان رسیده است',
+                    'reply_markup' => $this->generateKeyboard('notMoreQuestion'),
+                ]);
+            }
         }
     }
 
@@ -270,14 +323,14 @@ class Answer
             if ($currentQuestion->correct_answer == $this->text) {
                 $this->telegram->sendMessage([
                     'chat_id' => $this->chat_id,
-                    'text' => 'جواب شما درست است'.PHP_EOL.' Tips:'.PHP_EOL.$currentQuestion->description_nl.PHP_EOL.'نکته آموزشی'.PHP_EOL.$currentQuestion->description_fa,
+                    'text' => 'جواب شما درست است✅'.PHP_EOL.' Tips:'.PHP_EOL.$currentQuestion->description_nl.PHP_EOL.'نکته آموزشی'.PHP_EOL.$currentQuestion->description_fa,
                     'reply_markup' => $this->generateKeyboard('nextTest'),
                 ]);
 
             } else {
                 $this->telegram->sendMessage([
                     'chat_id' => $this->chat_id,
-                    'text' => 'جواب شما درست نیست'.PHP_EOL.'جواب صحیح: '.PHP_EOL.$currentQuestion->correct_answer.PHP_EOL.' Tips:'.PHP_EOL.PHP_EOL.$currentQuestion->description_nl.PHP_EOL.PHP_EOL.'نکته آموزشی'.PHP_EOL.PHP_EOL.$currentQuestion->description_fa,
+                    'text' => 'جواب شما درست نیست❌'.PHP_EOL.'جواب صحیح: '.PHP_EOL.$currentQuestion->correct_answer.PHP_EOL.' Tips:'.PHP_EOL.PHP_EOL.$currentQuestion->description_nl.PHP_EOL.PHP_EOL.'نکته آموزشی'.PHP_EOL.PHP_EOL.$currentQuestion->description_fa,
                     'reply_markup' => $this->generateKeyboard('nextTest'),
                 ]);
 
