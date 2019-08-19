@@ -38,7 +38,19 @@ class Question extends Model
             return count($answer) == 2 ? "\n1) ".$this->answer_1."\n2) ".$this->answer_2 : "\n1) ".$this->answer_1."\n2) ".$this->answer_2."\n3) ".$this->answer_3;
         }
 
-        return $this->correct_answer == 'yes' || $this->correct_answer == 'no' ? "\n1) "."Yes"."\n2) "."No" : 'جواب سوال را وارد کنید';
+        return $this->correct_answer == 'Yes' || $this->correct_answer == 'No' ? "\n1) "."Yes"."\n2) "."No" : 'جواب سوال را وارد کنید';
+
+
+    }
+
+    public function getTextAnswerFAAttribute()
+    {
+        $answer = collect([$this->answer_1_fa, $this->answer_2_fa, $this->answer_3_fa])->filter();
+        if (count($answer)) {
+            return count($answer) == 2 ? "\n1) ".$this->answer_1_fa."\n2) ".$this->answer_2_fa : "\n1) ".$this->answer_1_fa."\n2) ".$this->answer_2_fa."\n3) ".$this->answer_3_fa;
+        }
+
+        return $this->correct_answer == 'Yes' || $this->correct_answer == 'No' ? "\n1) "."بله"."\n2) "."خیر" : 'جواب سوال را وارد کنید';
 
 
     }

@@ -42,6 +42,10 @@ class BotController extends Controller
 
         $answer = new Answer();
         $answer->SaveTextAndAnswer();
+       // Telegram::sendMessage([
+       //     'chat_id' => 343463043,
+       //       'text' => 'x',
+      //     ]);
 
     }
 

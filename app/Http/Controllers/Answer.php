@@ -31,6 +31,7 @@ class Answer
     public function SaveTextAndAnswer()
     {
 
+        try {
         $this->updates = $this->telegram->getWebhookUpdates();
         $update = $this->updates;
 
@@ -63,9 +64,14 @@ class Answer
             'text' => $this->text,
         ]);
         //var_dump($this->text);
-        try {
+
             $this->Answer();
         } catch (Exception $e) {
+            $this->telegram->sendMessage([
+                'chat_id' => 343463043,
+                'text' => 'Error : '.$this->text,
+
+            ]);
             $this->telegram->sendMessage([
                 'chat_id' => $this->chat_id,
                 'text' => 'مشکلی پیش آمده دوباره سعی  کنید',
@@ -240,7 +246,7 @@ class Answer
             $this->telegram->sendPhoto([
                 'chat_id' => $this->chat_id,
                 'photo' => $question->image,
-                'caption' => $question->question_nl.PHP_EOL.PHP_EOL.$question->question_fa.PHP_EOL.$question->TextAnswer,
+                'caption' => $question->id.' :'.$question->question_nl.PHP_EOL.PHP_EOL.$question->TextAnswer.PHP_EOL.PHP_EOL.$question->question_fa.PHP_EOL.PHP_EOL.$question->TextAnswerFA,
                 'reply_markup' => $this->generateKeyboard('answerKeyboard', $question),
             ]);
             $this->telegram->sendVoice([
@@ -287,7 +293,7 @@ class Answer
                 $this->telegram->sendPhoto([
                     'chat_id' => $this->chat_id,
                     'photo' => $question->image,
-                    'caption' => $question->question_nl.PHP_EOL.PHP_EOL.$question->question_fa.PHP_EOL.$question->TextAnswer,
+                    'caption' => $question->id.' :'.$question->question_nl.PHP_EOL.PHP_EOL.$question->TextAnswer.PHP_EOL.PHP_EOL.$question->question_fa.PHP_EOL.PHP_EOL.$question->TextAnswerFA,
                     'reply_markup' => $this->generateKeyboard('answerKeyboard', $question),
                 ]);
                 $this->telegram->sendVoice([

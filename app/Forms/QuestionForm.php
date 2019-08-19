@@ -15,6 +15,10 @@ class QuestionForm extends Form
         $this->add('answer_2', Field::TEXT);
         $this->add('answer_3', Field::TEXT);
         $this->add('answer_4', Field::TEXT);
+        $this->add('answer_1_fa', Field::TEXT);
+        $this->add('answer_2_fa', Field::TEXT);
+        $this->add('answer_3_fa', Field::TEXT);
+        $this->add('answer_4_fa', Field::TEXT);
         $this->add('correct_answer', Field::TEXT, [
             'choices' => [
                 '1' => '1',
