@@ -117,10 +117,12 @@ class Answer
                 ]);
 
                 $user = User::with('questions')->where('telegram_user_id', $this->chat_id)->first();
+
                 $user->active_exam_id = $exam_id;
                 $user->active_question_order = $question->pivot->order;
                 $user->save();
-                $user->questions()->attach([$question->id]);
+                $user->questions()->detach();
+                $user->questions()->sync([$question->id]);
 
             } else {
                 $this->telegram->sendMessage([
