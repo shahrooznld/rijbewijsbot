@@ -39,13 +39,13 @@ class BotController extends Controller
      */
     public function store(Request $request)
     {
-
+//
         $answer = new Answer();
         $answer->SaveTextAndAnswer();
-       // Telegram::sendMessage([
-       //     'chat_id' => 343463043,
-       //       'text' => 'x',
-      //     ]);
+//        Telegram::sendMessage([
+//            'chat_id' => 343463043,
+//              'text' => 'x',
+//           ]);
 
     }
 

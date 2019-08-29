@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exam;
 use App\Forms\QuestionForm;
 use App\Question;
 use Illuminate\Http\Request;
@@ -102,10 +103,9 @@ class QuestionController extends Controller
 //                ]);
 //            }
 //        }
+        $exams = Exam::with('questions')->get();
 
-        $questions = Question::all();
-
-        return view('question.index', compact('questions'));
+        return view('question.index', compact('exams'));
     }
 
     /**

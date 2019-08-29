@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 
 use App\Bot;
+use App\Exam;
 use App\Question;
 use App\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,28 +23,45 @@ class Answer
     protected $firstName;
     protected $lastName;
     protected $text;
+    protected $callback_query;
 
     public function __construct()
     {
         $this->telegram = new Api('741743493:AAGVwSJbeHENq3e0QtACLLSL-N6-AxcYYfg');
+
+        // api test robot
+        //$this->telegram = new Telegram('681267990:AAFgWHjZDUbdJCj2u4Op9FnZDpjOdo-wp6o');
     }
 
     public function SaveTextAndAnswer()
     {
-
-        try {
         $this->updates = $this->telegram->getWebhookUpdates();
-        $update = $this->updates;
 
-        $this->update_id = $update->getUpdateId();
-        $this->message = ! is_null($update->getMessage()) ? $update->getMessage() : $update->getEditedMessage();
-        $this->messageId = $this->message->getMessageId();
-        $this->chat_id = $this->message->getChat()->getId();
-        $this->username = $this->message->getChat()->getUsername();
-        $this->firstName = $this->message->getChat()->getFirstName();
-        $this->lastName = $this->message->getChat()->getLastName();
-        $this->text = $this->message->getText();
 
+            $update = $this->updates;
+            if (isset($update["callback_query"])) {
+
+                $this->callback_query = $update["callback_query"]["data"];
+                $this->update_id = $update->getUpdateId();
+                $this->message = $update["callback_query"]["message"];
+                $this->messageId = $update["callback_query"]["message"]["message_id"];
+                $this->chat_id = $this->message->getChat()->getId();
+                $this->username = $this->message->getChat()->getUsername();
+                $this->firstName = $this->message->getChat()->getFirstName();
+                $this->lastName = $this->message->getChat()->getLastName();
+                $this->text = $this->message->getText();
+
+            } else {
+
+                $this->update_id = $update->getUpdateId();
+                $this->message = ! is_null($update->getMessage()) ? $update->getMessage() : $update->getEditedMessage();
+                $this->messageId = $this->message->getMessageId();
+                $this->chat_id = $this->message->getChat()->getId();
+                $this->username = $this->message->getChat()->getUsername();
+                $this->firstName = $this->message->getChat()->getFirstName();
+                $this->lastName = $this->message->getChat()->getLastName();
+                $this->text = $this->message->getText();
+            }
 //        $this->telegram->sendMessage([
 //                'chat_id' => 343463043,
 //                'text' => $this->text,
@@ -51,27 +69,71 @@ class Answer
 //            ]);
 //        dd('yes');
 //
-        $user = User::firstOrCreate(['telegram_user_id' => $this->chat_id], [
-            'first_name' => $this->firstName,
-            'last_name' => $this->lastName,
-            'telegram_username' => $this->username,
-        ]);
-
-        $user->bots()->create([
-            'update_id' => $this->update_id,
-            'telegram_user_id' => $this->chat_id,
-            'telegram_message_id' => $this->messageId,
-            'text' => $this->text,
-        ]);
-        //var_dump($this->text);
-
-            $this->Answer();
-        } catch (Exception $e) {
-            $this->telegram->sendMessage([
-                'chat_id' => 343463043,
-                'text' => 'Error : '.$this->text,
-
+            $user = User::firstOrCreate(['telegram_user_id' => $this->chat_id], [
+                'first_name' => $this->firstName,
+                'last_name' => $this->lastName,
+                'telegram_username' => $this->username,
             ]);
+
+            $user->bots()->create([
+                'update_id' => $this->update_id,
+                'telegram_user_id' => $this->chat_id,
+                'telegram_message_id' => $this->messageId,
+                'text' => $this->text,
+            ]);
+            //var_dump($this->text);
+
+
+            if (isset($this->callback_query)) {
+                $this->CallbackQueryAnswer();
+            } else {
+                $this->Answer();
+            }
+
+            //foreach
+
+    }
+
+    public function CallbackQueryAnswer()
+    {
+
+        $callback_value = explode('.', $this->callback_query);
+        if ($callback_value[0] == 'startExam_id') {
+            $exam_id = $callback_value[1];
+            $exam = Exam::where('id', $exam_id)->whereHas('questions')->first();
+            $question = $exam->questions()->first();
+
+            if (! is_null($question)) {
+                $question->image = $question->image ?? 'uploads/images/default.jpg';
+                $this->telegram->sendPhoto([
+                    'chat_id' => $this->chat_id,
+                    'photo' => $question->image,
+                    'caption' => $question->pivot->order.' :'.$question->question_nl.PHP_EOL.PHP_EOL.$question->TextAnswer.PHP_EOL.PHP_EOL.$question->question_fa.PHP_EOL.PHP_EOL.$question->TextAnswerFA,
+                    'reply_markup' => $this->generateKeyboard('answerKeyboard', $question),
+                ]);
+                $this->telegram->sendVoice([
+                    'chat_id' => $this->chat_id,
+                    'voice' => $question->audio_nl,
+                ]);
+
+                $user = User::with('questions')->where('telegram_user_id', $this->chat_id)->first();
+                $user->active_exam_id = $exam_id;
+                $user->active_question_order = $question->pivot->order;
+                $user->save();
+                $user->questions()->attach([$question->id]);
+
+            } else {
+                $this->telegram->sendMessage([
+                    'chat_id' => $this->chat_id,
+                    'text' => 'سوالات'.$exam->name.'به اتمام رسیده است لطفا آزمون دیگری را انتخاب کنید',
+                    'reply_markup' => $this->generateKeyboard('notMoreQuestion'),
+                ]);
+            }
+
+
+        } elseif ($callback_value[0] == 'accept' && $callback_value[1] == 'noaccept') {
+
+        } else {
             $this->telegram->sendMessage([
                 'chat_id' => $this->chat_id,
                 'text' => 'مشکلی پیش آمده دوباره سعی  کنید',
@@ -80,16 +142,20 @@ class Answer
             ]);
         }
 
+        $this->telegram->answerCallbackQuery([
+            'callback_query_id' => $this->updates['callback_query']['id'],
+            'cache_time' => 1,
+        ]);
+
     }
+
 
     public function Answer()
     {
         if ($this->text == '/start') {
             $this->startBot();
-        } elseif ($this->text == 'شروع تست آنلاین') {
-
-            $this->startTest();
-
+        } elseif ($this->text == 'لیست آزمون ها') {
+            $this->listTest();
         } elseif ($this->text == 'تست بعدی') {
             $this->nextTest();
         } elseif ($this->text == 'ادامه پاسخگویی به سوالات') {
@@ -135,7 +201,7 @@ class Answer
     {
         if ($type == 'start') {
             $keyboard = [
-                ['شروع تست آنلاین', 'تماس با ما'],
+                ['لیست آزمون ها', 'تماس با ما'],
                 ['توضیحات در مورد ربات آموزشی رانندگی'],
             ];
 
@@ -156,13 +222,38 @@ class Answer
                 'keyboard' => $keyboard,
                 'resize_keyboard' => true,
                 'one_time_keyboard' => true,
+
+            ]);
+
+            return $reply_markup;
+
+        } elseif ($type == 'listTest') {
+            $exams = Exam::all();
+            $inlineLayout = [];
+            $i = 0;
+            $j = 0;
+            foreach ($exams as $exam) {
+                if ($i == 2) {
+                    $inlineLayout [$j][$i] =
+                        ['text' => $exam->name, 'callback_data' => 'startExam_id.'.$exam->id];
+                    $j++;
+                    $i = 0;
+                } else {
+                    $inlineLayout [$j][$i] =
+                        ['text' => $exam->name, 'callback_data' => 'startExam_id.'.$exam->id];
+                    $i++;
+                }
+            }
+
+            $reply_markup = $this->telegram->replyKeyboardMarkup([
+                'inline_keyboard' => $inlineLayout,
             ]);
 
             return $reply_markup;
 
         } elseif ($type == 'mainMenu') {
             $keyboard = [
-                ['شروع تست آنلاین', 'تماس با ما'],
+                ['لیست آزمون ها', 'تماس با ما'],
                 ['ادامه پاسخگویی به سوالات', 'تعیین نوبت امتحانCBR'],
                 ['توضیحات در مورد ربات آموزشی رانندگی'],
 //                ['خرید اشتراک'],
@@ -226,54 +317,30 @@ class Answer
     {
         $this->telegram->sendMessage([
             'chat_id' => $this->chat_id,
-            'text' => 'سلام به ربات آموزش رانندگی و تست آنلاین رانندگی خوش آمدید.برای شروع تست آنلاین بر روی گزینه شروع تست بزنید',
+            'text' => 'سلام به ربات آموزش رانندگی و تست آنلاین رانندگی خوش آمدید.برای شروع تست از گزینه  لیست آزمون ها یکی از آزمون ها را انتخاب کنید',
             'reply_markup' => $this->generateKeyboard('start'),
         ]);
 
 
     }
 
-    public function startTest()
+    public function listTest()
     {
-        $user = User::where('telegram_user_id', $this->chat_id)->first();
-        $user->questions()->detach();
-        $question = Question::with('users')->whereDoesntHave('users', function (Builder $query) {
-            $query->where('telegram_user_id', $this->chat_id);
-        })->first();
-        //})->free()->first();
-        if (! is_null($question)) {
-            $question->image = $question->image ?? 'uploads/images/default.jpg';
-            $this->telegram->sendPhoto([
-                'chat_id' => $this->chat_id,
-                'photo' => $question->image,
-                'caption' => $question->id.' :'.$question->question_nl.PHP_EOL.PHP_EOL.$question->TextAnswer.PHP_EOL.PHP_EOL.$question->question_fa.PHP_EOL.PHP_EOL.$question->TextAnswerFA,
-                'reply_markup' => $this->generateKeyboard('answerKeyboard', $question),
-            ]);
-            $this->telegram->sendVoice([
-                'chat_id' => $this->chat_id,
-                'voice' => $question->audio_nl,
-            ]);
 
-            $user = User::with('questions')->where('telegram_user_id', $this->chat_id)->first();
-            $user->questions()->attach([$question->id]);
-        } else {
-            $this->telegram->sendMessage([
-                'chat_id' => $this->chat_id,
-                'text' => 'سولات شما به پایان رسیده است',
-                'reply_markup' => $this->generateKeyboard('notMoreQuestion'),
-            ]);
-        }
+        $this->telegram->sendMessage([
+            'chat_id' => $this->chat_id,
+            'text' => 'در قسمت زیر لیست امتحان ها را میتوانید انتخاب کنید',
+            'reply_markup' => $this->generateKeyboard('listTest'),
+        ]);
+
     }
+
 
     public function nextTest()
     {
-        $user = User::with([
-            'questions' => function ($query) {
-                $query->orderBy('pivot_created_at', 'DESC');
-            },
-        ])->where('telegram_user_id', $this->chat_id)->first();
+        $user = User::with('questions')->where('telegram_user_id', $this->chat_id)->first();
 
-        $currentQuestion = $user->questions->first();
+        $currentQuestion = $user->questions()->first();
         if (! is_null($currentQuestion) && is_null($currentQuestion->pivot->answer)) {
 
             $this->telegram->sendMessage([
@@ -281,74 +348,96 @@ class Answer
                 'text' => 'شما به سوال قبل خود پاسخ نداده اید لطفا پاسخ سوال قبل خود را بدهید',
                 'reply_markup' => $this->generateKeyboard('answerKeyboard', $currentQuestion),
             ]);
+
         } else {
 
-
-            $question = Question::with('users')->whereDoesntHave('users', function (Builder $query) {
-                $query->where('telegram_user_id', $this->chat_id);
-            })->first();
-            //})->free()->first();
-            if (! is_null($question)) {
-                $question->image = $question->image ?? 'uploads/images/default.jpg';
-                $this->telegram->sendPhoto([
-                    'chat_id' => $this->chat_id,
-                    'photo' => $question->image,
-                    'caption' => $question->id.' :'.$question->question_nl.PHP_EOL.PHP_EOL.$question->TextAnswer.PHP_EOL.PHP_EOL.$question->question_fa.PHP_EOL.PHP_EOL.$question->TextAnswerFA,
-                    'reply_markup' => $this->generateKeyboard('answerKeyboard', $question),
-                ]);
-                $this->telegram->sendVoice([
-                    'chat_id' => $this->chat_id,
-                    'voice' => $question->audio_nl,
-                ]);
-
-                $user = User::with('questions')->where('telegram_user_id', $this->chat_id)->first();
-                $user->questions()->attach([$question->id]);
-            } else {
+            $user = User::with('questions')->where('telegram_user_id', $this->chat_id)->first();
+            if (is_null($user->active_exam_id)) {
                 $this->telegram->sendMessage([
                     'chat_id' => $this->chat_id,
-                    'text' => 'سولات شما به پایان رسیده است',
-                    'reply_markup' => $this->generateKeyboard('notMoreQuestion'),
+                    'text' => 'لطفا یکی از آزمون های زیر را انتخاب کنید',
+                    'reply_markup' => $this->generateKeyboard('listTest'),
                 ]);
+
+            } else {
+                $exam = Exam::where('id', $user->active_exam_id)->whereHas('questions')->first();
+                $question = $exam->questions()->where('order', '>', $user->active_question_order
+                )->first();
+                if (! is_null($question)) {
+                    $question->image = $question->image ?? 'uploads/images/default.jpg';
+                    $this->telegram->sendPhoto([
+                        'chat_id' => $this->chat_id,
+                        'photo' => $question->image,
+                        'caption' => $question->pivot->order.' :'.$question->question_nl.PHP_EOL.PHP_EOL.$question->TextAnswer.PHP_EOL.PHP_EOL.$question->question_fa.PHP_EOL.PHP_EOL.$question->TextAnswerFA,
+                        'reply_markup' => $this->generateKeyboard('answerKeyboard', $question),
+                    ]);
+                    $this->telegram->sendVoice([
+                        'chat_id' => $this->chat_id,
+                        'voice' => $question->audio_nl,
+                    ]);
+
+                    $user = User::with('questions')->where('telegram_user_id', $this->chat_id)->first();
+                    $user->active_exam_id = $exam->id;
+                    $user->active_question_order = $question->pivot->order;
+                    $user->save();
+
+                    $user->questions()->attach([$question->id]);
+                } else {
+                    $this->telegram->sendMessage([
+                        'chat_id' => $this->chat_id,
+                        'text' => 'سوالات '.$exam->name.'به اتمام رسیده است لطفا آزمون دیگری را انتخاب کنید',
+                        'reply_markup' => $this->generateKeyboard('notMoreQuestion'),
+                    ]);
+                }
             }
         }
     }
 
     public function checkAnswer()
     {
-        $user = User::with([
-            'questions' => function ($query) {
-                $query->orderBy('pivot_created_at', 'DESC');
-            },
-        ])->where('telegram_user_id', $this->chat_id)->first();
+        $user = User::with('questions')->where('telegram_user_id', $this->chat_id)->first();
+        $exam = Exam::where('id', $user->active_exam_id)->whereHas('questions')->first();
 
-        $currentQuestion = $user->questions->first();
-        if (! is_null($currentQuestion) && is_null($currentQuestion->pivot->answer)) {
-            $currentQuestion->pivot->answer = $this->text;
-            $currentQuestion->pivot->save();
+        if (is_null($exam) || is_null($user)) {
 
-            if ($currentQuestion->correct_answer == $this->text) {
-                $this->telegram->sendMessage([
-                    'chat_id' => $this->chat_id,
-                    'text' => 'جواب شما درست است✅'.PHP_EOL.' Tips:'.PHP_EOL.$currentQuestion->description_nl.PHP_EOL.'نکته آموزشی'.PHP_EOL.$currentQuestion->description_fa,
-                    'reply_markup' => $this->generateKeyboard('nextTest'),
-                ]);
-
-            } else {
-                $this->telegram->sendMessage([
-                    'chat_id' => $this->chat_id,
-                    'text' => 'جواب شما درست نیست❌'.PHP_EOL.'جواب صحیح: '.PHP_EOL.$currentQuestion->correct_answer.PHP_EOL.' Tips:'.PHP_EOL.PHP_EOL.$currentQuestion->description_nl.PHP_EOL.PHP_EOL.'نکته آموزشی'.PHP_EOL.PHP_EOL.$currentQuestion->description_fa,
-                    'reply_markup' => $this->generateKeyboard('nextTest'),
-                ]);
-
-            }
-        } else {
             $this->telegram->sendMessage([
                 'chat_id' => $this->chat_id,
                 'text' => 'جوابی برای درخواست شما وجود ندارد لطفا یکی از منو زیر را انتخاب کنید',
                 'reply_markup' => $this->generateKeyboard('unknowenRequest'),
 
             ]);
+        } else {
+            $currentQuestion = $exam->questions()->where('order', $user->active_question_order)->first();
+            $currentQuestionPivot = $currentQuestion->load('users');
+            $currentQuestionPivot = $currentQuestionPivot->users->where('telegram_user_id', $this->chat_id)->first();
+            if (! is_null($currentQuestionPivot) && is_null($currentQuestionPivot->pivot->answer)) {
+                $currentQuestionPivot->pivot->answer = $this->text;
+                $currentQuestionPivot->pivot->save();
 
+                if ($currentQuestion->correct_answer == $this->text) {
+                    $this->telegram->sendMessage([
+                        'chat_id' => $this->chat_id,
+                        'text' => 'جواب شما درست است✅'.PHP_EOL.' Tips:'.PHP_EOL.$currentQuestion->description_nl.PHP_EOL.'نکته آموزشی'.PHP_EOL.$currentQuestion->description_fa,
+                        'reply_markup' => $this->generateKeyboard('nextTest'),
+                    ]);
+
+                } else {
+                    $this->telegram->sendMessage([
+                        'chat_id' => $this->chat_id,
+                        'text' => 'جواب شما درست نیست❌'.PHP_EOL.'جواب صحیح: '.PHP_EOL.$currentQuestion->correct_answer.PHP_EOL.' Tips:'.PHP_EOL.PHP_EOL.$currentQuestion->description_nl.PHP_EOL.PHP_EOL.'نکته آموزشی'.PHP_EOL.PHP_EOL.$currentQuestion->description_fa,
+                        'reply_markup' => $this->generateKeyboard('nextTest'),
+                    ]);
+
+                }
+            } else {
+                $this->telegram->sendMessage([
+                    'chat_id' => $this->chat_id,
+                    'text' => 'جوابی برای درخواست شما وجود ندارد لطفا یکی از منو زیر را انتخاب کنید',
+                    'reply_markup' => $this->generateKeyboard('unknowenRequest'),
+
+                ]);
+
+            }
         }
 
     }

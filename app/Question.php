@@ -18,6 +18,10 @@ class Question extends Model
     {
         return $this->belongsToMany(User::class)->withTimestamps()->withPivot('answer');
     }
+    public function exams()
+    {
+        return $this->belongsToMany(Exam::class)->orderBy('order')->withTimestamps()->withPivot('order');
+    }
 
     public function getKeyboardAttribute()
     {
