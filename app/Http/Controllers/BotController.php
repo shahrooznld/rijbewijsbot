@@ -40,7 +40,7 @@ class BotController extends Controller
     public function store(Request $request)
     {
 //
-        $answer = new Answer();
+        $answer = new WebhookAnswer();
         $answer->SaveTextAndAnswer();
 //        Telegram::sendMessage([
 //            'chat_id' => 343463043,

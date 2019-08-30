@@ -11,7 +11,7 @@ use App\User;
 use Illuminate\Database\Eloquent\Builder;
 use Telegram\Bot\Api;
 
-class Answer
+class Answer implements InterfaceAnswer
 {
     protected $telegram;
     protected $updates;
