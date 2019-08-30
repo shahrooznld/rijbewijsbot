@@ -27,7 +27,7 @@ class Answer
 
     public function __construct()
     {
-        $this->telegram = new Api('741743493:AAGVwSJbeHENq3e0QtACLLSL-N6-AxcYYfg');
+        $this->telegram = new Telegram('741743493:AAGVwSJbeHENq3e0QtACLLSL-N6-AxcYYfg');
 
         // api test robot
         //$this->telegram = new Telegram('681267990:AAFgWHjZDUbdJCj2u4Op9FnZDpjOdo-wp6o');
