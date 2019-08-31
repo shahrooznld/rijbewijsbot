@@ -7,11 +7,11 @@
                 {{ session('status') }}
             </div>
         @endif
-        <a class="btn btn-primary" href="{{route('questions.create')}}" role="button">
+        <a class="btn btn-primary" href="{{route('questions.create',$Exam)}}" role="button">
             Create new
         </a>
     </div>
-    @if(!is_null($exams))
+    @if(!is_null($Exam))
         <table class="table">
             <thead>
             <tr>
@@ -25,24 +25,21 @@
             </tr>
             </thead>
             <tbody>
-            @foreach($exams as $exam)
-             @php
-             $questions = $exam->questions;
-             @endphp
-                @foreach($questions as $question)
+
+                @foreach($Exam->questions as $question)
                     <tr>
                         <th scope="row">{{$question->script_name}}</th>
-                        <td>{{$exam->name}}</td>
+                        <td>{{$Exam->name}}</td>
                         <td>{{$question->question_nl}}</td>
                         <td>{{$question->question_fa}}</td>
                         <td>{{$question->correct_answer}}</td>
                         <td>{{$question->is_free ? 'Gratis' : ''}}</td>
-                        <td><a class="btn btn-primary" href="{{route('questions.edit',$question)}}" role="button">
+                        <td><a class="btn btn-primary" href="{{route('questions.edit',[$Exam,$question])}}" role="button">
                                 Edit
                             </a></td>
                     </tr>
                 @endforeach
-            @endforeach
+
             </tbody>
         </table>
 

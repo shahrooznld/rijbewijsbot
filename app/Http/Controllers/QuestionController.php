@@ -26,7 +26,7 @@ class QuestionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Exam $Exam)
     {
 //        $dir = 'uploads/script/';
 //        $photoDir = 'uploads/images/';
@@ -103,9 +103,8 @@ class QuestionController extends Controller
 //                ]);
 //            }
 //        }
-        $exams = Exam::with('questions')->get();
 
-        return view('question.index', compact('exams'));
+        return view('question.index', compact('Exam'));
     }
 
     /**
@@ -113,11 +112,12 @@ class QuestionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(FormBuilder $formBuilder)
+    public function create(Exam $Exam,FormBuilder $formBuilder)
     {
+
         $form = $formBuilder->create(QuestionForm::class, [
             'method' => 'POST',
-            'url' => route('questions.index'),
+            'url' => route('questions.index',$Exam),
 
         ]);
 
@@ -130,14 +130,16 @@ class QuestionController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, FormBuilder $formBuilder)
+    public function store(Exam $Exam,Request $request, FormBuilder $formBuilder)
     {
         $form = $formBuilder->create(QuestionForm::class);
         $values = $form->getFieldValues();
 
-        Question::create($values);
+        $question = Question::create($values);
 
-        return redirect()->route('questions.index')->with(['status' => 'Question added successfully.']);
+        $Exam->questions()->attach($question,['order' => $Exam->questions->count()+1]);
+
+        return redirect()->route('questions.index',$Exam)->with(['status' => 'Question added successfully.']);
     }
 
     /**
@@ -157,11 +159,11 @@ class QuestionController extends Controller
      * @param \App\Question $Question
      * @return \Illuminate\Http\Response
      */
-    public function edit(Question $Question, FormBuilder $formBuilder)
+    public function edit(Exam $Exam, Question $Question, FormBuilder $formBuilder)
     {
         $form = $formBuilder->create(QuestionForm::class, [
             'method' => 'PUT',
-            'url' => route('questions.update',$Question),
+            'url' => route('questions.update',[$Exam,$Question]),
             'model' => $Question,
         ]);
 
@@ -175,15 +177,16 @@ class QuestionController extends Controller
      * @param \App\Question $Question
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, FormBuilder $formBuilder, Question $Question)
+    public function update(Exam $Exam,Request $request, FormBuilder $formBuilder, Question $Question)
     {
+
         $form = $formBuilder->create(QuestionForm::class);
         $values = $form->getFieldValues();
 
         $Question->fill($values);
         $Question->save();
 
-        return redirect()->route('questions.index')->with(['status' => 'Question updated successfully.']);
+        return redirect()->route('questions.index',$Exam)->with(['status' => 'Question updated successfully.']);
     }
 
     /**

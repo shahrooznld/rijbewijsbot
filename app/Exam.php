@@ -10,6 +10,7 @@ class Exam extends Model
     protected $guarded = [];
 
     public function questions() {
-        return $this->belongsToMany(Question::class)->orderBy('order','asc')->withTimestamps()->withPivot('order')->free();
+        return $this->belongsToMany(Question::class)->orderBy('order','asc')->withTimestamps()->withPivot('order');
+        //return $this->belongsToMany(Question::class)->orderBy('order','asc')->withTimestamps()->withPivot('order')->free();
     }
 }
