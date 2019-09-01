@@ -8,6 +8,7 @@
               <div class="card-header">Menu</div>
 
               <div class="list-group .list-group-flush">
+                    <a href="{{Route::get('users')->uri}}" class="list-group-item list-group-item-action">Users</a>
                     <a href="{{Route::get('exams')->uri}}" class="list-group-item list-group-item-action">Exams</a>
                     <a href="{{ Route::get('sends')->uri}}" class="list-group-item list-group-item-action">Send To All Message</a>
                   </div>
