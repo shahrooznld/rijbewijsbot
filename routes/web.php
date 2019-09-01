@@ -17,6 +17,7 @@ Route::get('/', function () {
 Route::get('bot','BotController@index');
 Route::post('bot','BotController@store');
 Route::resource('{exam}/questions', 'QuestionController');
+Route::resource('users', 'UserController');
 Route::resource('exams', 'ExamController');
 Route::resource('sends', 'SendToAllController');
 Auth::routes();
