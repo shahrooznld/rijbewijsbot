@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Bot;
+use App\Http\Controllers\Classes\Answer;
+use App\Http\Controllers\Classes\WebhookAnswer;
 use Illuminate\Http\Request;
 use Telegram\Bot\Api;
 use Telegram\Bot\Laravel\Facades\Telegram;
