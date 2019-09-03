@@ -35,6 +35,23 @@ class Answer implements InterfaceAnswer
     //$this->telegram = new Telegram('681267990:AAFgWHjZDUbdJCj2u4Op9FnZDpjOdo-wp6o');
   }
 
+  public function UnknowenMessage()
+  {
+    $this->telegram->forwardMessage([
+      'chat_id' => $this->adminId,
+      'from_chat_id' => $this->chat_id,
+      'message_id' => $this->messageId,
+    ]);
+    $this->telegram->sendMessage([
+      'chat_id' => $this->chat_id,
+      'text' => 'جوابی برای درخواست شما وجود ندارد لطفا یکی از منو زیر را انتخاب کنید',
+      'reply_markup' => $this->generateKeyboard('unknowenRequest'),
+
+    ]);
+
+
+  }
+
   public function SaveTextAndAnswer()
   {
     $this->updates = $this->telegram->getWebhookUpdates();
@@ -403,18 +420,7 @@ class Answer implements InterfaceAnswer
 
     if (is_null($exam) || is_null($user)) {
 
-      $this->telegram->forwardMessage([
-        'chat_id' => $this->adminId,
-        'from_chat_id' => $this->chat_id,
-        'message_id' => $this->messageId,
-      ]);
-
-      $this->telegram->sendMessage([
-        'chat_id' => $this->chat_id,
-        'text' => 'جوابی برای درخواست شما وجود ندارد لطفا یکی از منو زیر را انتخاب کنید',
-        'reply_markup' => $this->generateKeyboard('unknowenRequest'),
-
-      ]);
+      $this->UnknowenMessage();
     } else {
       $currentQuestion = $exam->questions()->where('order', $user->active_question_order)->first();
       $currentQuestionPivot = $currentQuestion->load('users');
@@ -439,17 +445,8 @@ class Answer implements InterfaceAnswer
 
         }
       } else {
-        $this->telegram->forwardMessage([
-          'chat_id' => $this->adminId,
-          'from_chat_id' => $this->chat_id,
-          'message_id' => $this->messageId,
-        ]);
-        $this->telegram->sendMessage([
-          'chat_id' => $this->chat_id,
-          'text' => 'جوابی برای درخواست شما وجود ندارد لطفا یکی از منو زیر را انتخاب کنید',
-          'reply_markup' => $this->generateKeyboard('unknowenRequest'),
 
-        ]);
+        $this->UnknowenMessage();
 
       }
     }
