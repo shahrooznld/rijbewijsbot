@@ -24,10 +24,12 @@ class Answer implements InterfaceAnswer
     protected $lastName;
     protected $text;
     protected $callback_query;
+    protected $adminId;
 
     public function __construct()
     {
         $this->telegram = new Telegram('741743493:AAGVwSJbeHENq3e0QtACLLSL-N6-AxcYYfg');
+        $this->adminId = 343463043;
 
         // api test robot
         //$this->telegram = new Telegram('681267990:AAFgWHjZDUbdJCj2u4Op9FnZDpjOdo-wp6o');
@@ -183,13 +185,13 @@ class Answer implements InterfaceAnswer
         } elseif ($this->text == 'خرید اشتراک') {
             $this->telegram->sendMessage([
                 'chat_id' => $this->chat_id,
-                'text' => 'با خرید اشتراک شما به تمامی سوالات به صورت نامحدود دسترسی خواهید داشت و میتوانید این سوالات را به صورت مداوم تمرین کنید.برای خرید به آی دی تلگرام @shahrooz_nl پیغام دهید',
+                'text' => 'با خرید اشتراک شما به تمامی سوالات به صورت نامحدود دسترسی خواهید داشت و میتوانید این سوالات را به صورت مداوم تمرین کنید.برای خرید به آی دی تلگرام @shahrooz_nld پیغام دهید',
                 'reply_markup' => $this->generateKeyboard('mainMenu'),
             ]);
         } elseif ($this->text == 'تعیین نوبت امتحانCBR') {
             $this->telegram->sendMessage([
                 'chat_id' => $this->chat_id,
-                'text' => 'سلام برای تعیین وقت آنلاین در سایت CBR و یا مشاوره به آی دی تلگرام @shahrooz_nl پیغام دهید',
+                'text' => 'سلام برای تعیین وقت آنلاین در سایت CBR و یا مشاوره به آی دی تلگرام @shahrooz_nld پیغام دهید',
                 'reply_markup' => $this->generateKeyboard('mainMenu'),
             ]);
 
@@ -402,6 +404,12 @@ class Answer implements InterfaceAnswer
 
         if (is_null($exam) || is_null($user)) {
 
+          $this->telegram->forwardMessage([
+              'chat_id' => $this->adminId,
+              'from_chat_id' => $this->chat_id,
+              'message_id' => $this->messageId,
+          ]);
+
             $this->telegram->sendMessage([
                 'chat_id' => $this->chat_id,
                 'text' => 'جوابی برای درخواست شما وجود ندارد لطفا یکی از منو زیر را انتخاب کنید',
@@ -432,6 +440,11 @@ class Answer implements InterfaceAnswer
 
                 }
             } else {
+              $this->telegram->forwardMessage([
+                  'chat_id' => $this->adminId,
+                  'from_chat_id' => $this->chat_id,
+                  'message_id' => $this->messageId,
+              ]);
                 $this->telegram->sendMessage([
                     'chat_id' => $this->chat_id,
                     'text' => 'جوابی برای درخواست شما وجود ندارد لطفا یکی از منو زیر را انتخاب کنید',
