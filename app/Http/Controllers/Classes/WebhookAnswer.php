@@ -56,14 +56,12 @@ class WebhookAnswer extends Answer
       'telegram_message_id' => $this->messageId,
       'text' => $this->text,
     ]);
-
-
-
     if (isset($this->callback_query)) {
       $this->CallbackQueryAnswer();
     } else {
       $this->Answer();
     }
+
   }
 
 

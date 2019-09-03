@@ -84,13 +84,12 @@ class Answer implements InterfaceAnswer
       'text' => $this->text,
     ]);
     //var_dump($this->text);
-
-
-    if (isset($this->callback_query)) {
+        if (isset($this->callback_query)) {
       $this->CallbackQueryAnswer();
     } else {
       $this->Answer();
     }
+
 
     //foreach
 
