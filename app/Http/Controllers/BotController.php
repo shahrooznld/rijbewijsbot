@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Bot;
-use App\Http\Controllers\Classes\Answer;
+use App\Http\Controllers\Classes\UpdateAnswer;
 use App\Http\Controllers\Classes\WebhookAnswer;
 use Illuminate\Http\Request;
 use Telegram\Bot\Api;
@@ -18,7 +18,7 @@ class BotController extends Controller
      */
     public function index(Request $request)
     {
-        $answer = new Answer();
+        $answer = new UpdateAnswer();
         $answer->SaveTextAndAnswer();
 
     }

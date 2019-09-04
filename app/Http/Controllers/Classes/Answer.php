@@ -37,18 +37,8 @@ class Answer implements InterfaceAnswer
 
   public function UnknowenMessage()
   {
-    $this->telegram->forwardMessage([
-      'chat_id' => $this->adminId,
-      'from_chat_id' => $this->chat_id,
-      'message_id' => $this->messageId,
-    ]);
-    $this->telegram->sendMessage([
-      'chat_id' => $this->chat_id,
-      'text' => 'جوابی برای درخواست شما وجود ندارد لطفا یکی از منو زیر را انتخاب کنید',
-      'reply_markup' => $this->generateKeyboard('unknowenRequest'),
 
-    ]);
-
+    return UnknownMessage::response($this->telegram,$this->chat_id,$this->messageId,$this->generateKeyboard('unknowenRequest'),$this->adminId);
 
   }
 
