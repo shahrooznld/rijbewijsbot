@@ -15,6 +15,7 @@
         <table class="table">
             <thead>
             <tr>
+                <th scope="col">Number</th>
                 <th scope="col">#</th>
                 <th scope="col">نام آزمون</th>
                 <th scope="col">Question Nl</th>
@@ -26,9 +27,10 @@
             </thead>
             <tbody>
 
-                @foreach($Exam->questions as $question)
+                @foreach($Exam->questions as $id =>$question)
                     <tr>
-                        <th scope="row">{{$question->script_name}}</th>
+                        <th scope="row">{{$id+1}}</th>
+                        <td>{{$question->script_name}}</td>
                         <td>{{$Exam->name}}</td>
                         <td>{{$question->question_nl}}</td>
                         <td>{{$question->question_fa}}</td>
