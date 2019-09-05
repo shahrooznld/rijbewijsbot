@@ -19,7 +19,7 @@ class CreateBotsTable extends Migration
             $table->unsignedBigInteger('update_id')->nullable();
             $table->unsignedBigInteger('telegram_user_id')->nullable();
             $table->unsignedBigInteger('telegram_message_id')->nullable();
-            $table->string('text')->nullable();
+            $table->text('text')->nullable();
             $table->timestamps();
         });
     }
